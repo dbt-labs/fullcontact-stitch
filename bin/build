@@ -1,0 +1,10 @@
+#!/bin/bash
+
+cd build
+
+bash -cx 'rm -rf *'
+bash -cx 'cp ../lambda/* .'
+
+bash -cx 'pip install -r requirements.txt -t .'
+
+zip -r ../target/fullcontact_lambda.zip .

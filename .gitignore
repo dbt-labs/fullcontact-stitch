@@ -1,0 +1,7 @@
+*.pyc
+bin/terraform
+terraform/*.tfstate
+build/
+target/
+config/*
+!config/sample.env

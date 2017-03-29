@@ -15,6 +15,6 @@ resource "aws_lambda_event_source_mapping" "fullcontact_event_source_mapping" {
   batch_size = "${var.KINESIS_WORKER_BATCH_SIZE}"
   event_source_arn = "${aws_kinesis_stream.fullcontact.arn}"
   function_name = "${aws_lambda_function.fullcontact_worker.arn}"
-  starting_position = "TRIM_HORIZON"
+  starting_position = "LATEST"
   enabled = true
 }

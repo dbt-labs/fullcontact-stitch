@@ -4,6 +4,7 @@ variable "AWS_PROFILE" {}
 variable "SUBNET_IDS" { type = "list" }
 
 variable "KINESIS_WORKER_BATCH_SIZE" { default = 10 }
+variable "KINESIS_SHARD_COUNT" { default = 1 }
 
 variable "POSTGRES_HOST" {}
 variable "POSTGRES_USER" {}

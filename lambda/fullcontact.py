@@ -2,7 +2,7 @@ import os
 import requests
 import time
 
-from . import common
+import common
 
 
 def persist_to_stitch(data):
@@ -13,7 +13,7 @@ def persist_to_stitch(data):
         url,
         headers={'Content-Type': 'application/json',
                  'Authorization': 'Bearer {}'.format(api_key)},
-        data=data)
+        json=[data])
 
 
 def get_select():
@@ -25,7 +25,7 @@ def get_select():
 
 def workon_record(record):
     (email_address,) = record
-    url = "https://api.fullcontact.com/person.json"
+    url = "https://api.fullcontact.com/v2/person.json"
     api_key = os.getenv('FULLCONTACT_API_KEY')
 
     response = requests.get(
@@ -35,14 +35,15 @@ def workon_record(record):
 
     requested_at = int(round(time.time()))
     success_at = None
+    unavailable_at = None
     to_persist = {}
 
     if response.status_code == 200:
         success_at = int(round(time.time()))
         to_persist = response.json().copy()
 
-        desired_keys = set('photos', 'contactInfo', 'organizations',
-                           'demographics', 'socialProfiles')
+        desired_keys = set(['photos', 'contactInfo', 'organizations',
+                            'demographics', 'socialProfiles'])
 
         all_keys = set(to_persist.keys())
 
@@ -55,19 +56,24 @@ def workon_record(record):
         # we tried, but there's no data yet. just tell stitch that we tried.
         pass
 
+    elif (response.status_code == 404 and
+          'No results found for this Id.' in response.text):
+        unavailable_at = int(round(time.time()))
+
     else:
         common.log(
             "WARNING: Fullcontact request failed with {}."
             .format(response.status_code))
-        common.log(response.data)
+        common.log(response.text)
         raise RuntimeError
 
     to_persist['email_address'] = email_address
     to_persist['requested_at'] = requested_at
     to_persist['success_at'] = success_at
+    to_persist['unavailable_at'] = unavailable_at
 
     result = persist_to_stitch({
-        'client_id': os.getenv('STITCH_CLIENT_ID'),
+        'client_id': int(os.getenv('STITCH_CLIENT_ID')),
         'table_name': 'fullcontact_person',
         'sequence': int(round(time.time())),
         'action': 'upsert',
@@ -79,7 +85,7 @@ def workon_record(record):
         common.log(
             "WARNING: Stitch request failed with {}."
             .format(result.status_code))
-        common.log(result.data)
+        common.log(result.text)
         raise RuntimeError
 
     else:

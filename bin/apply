@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd terraform/
+
+../bin/terraform apply -var-file=../config/config.env

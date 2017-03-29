@@ -1,6 +1,7 @@
 *.pyc
 bin/terraform
 terraform/*.tfstate
+terraform/*.tfstate*
 build/
 target/
 config/*

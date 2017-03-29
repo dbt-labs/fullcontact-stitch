@@ -3,6 +3,11 @@
 cd build
 
 bash -cx 'rm -rf *'
+
+bash -cx 'git clone --depth 1 https://github.com/jkehler/awslambda-psycopg2 .'
+bash -cx 'find . ! -name "psycopg2" -type d -exec rm -rf {} \;'
+bash -cx 'find . ! -name "psycopg2" -type f -exec rm -rf {} \;'
+
 bash -cx 'cp ../lambda/* .'
 
 bash -cx 'pip install -r requirements.txt -t .'

@@ -1,4 +1,22 @@
 #!/bin/bash
 
-wget -P/tmp https://releases.hashicorp.com/terraform/0.9.1/terraform_0.9.1_darwin_amd64.zip
-unzip /tmp/terraform_0.9.1_darwin_amd64.zip -d bin/
+SCRIPT=`realpath $0`
+SCRIPTPATH=`dirname $SCRIPT`
+
+if [ -e "$SCRIPTPATH/terraform" ]; then
+    echo 'This package is already installed. To uninstall, try `bin/uninstall`.'
+    exit 0
+fi
+
+if [ "$(uname)" == "Darwin" ]; then
+    # macOS
+    wget -P/tmp https://releases.hashicorp.com/terraform/0.9.1/terraform_0.9.1_darwin_amd64.zip
+    unzip /tmp/terraform_0.9.1_darwin_amd64.zip -d "$SCRIPTPATH/"
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    # Linux
+    wget -P/tmp https://releases.hashicorp.com/terraform/0.9.1/terraform_0.9.1_linux_amd64.zip
+    unzip /tmp/terraform_0.9.1_linux_amd64.zip -d "$SCRIPTPATH/"
+else
+    echo "This package only works out-of-the-box on macOS and Linux."
+    exit 1
+fi

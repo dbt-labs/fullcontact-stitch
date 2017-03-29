@@ -1,0 +1,13 @@
+#!/bin/bash
+
+SCRIPT=`realpath $0`
+SCRIPTPATH=`dirname $SCRIPT`
+
+if [ -e "$SCRIPTPATH/terraform" ]; then
+    rm -f "$SCRIPTPATH/terraform"
+    echo 'Uninstalled successfully.'
+    exit 0
+else
+    echo 'Not installed, nothing to do.'
+    exit 0
+fi

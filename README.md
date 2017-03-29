@@ -13,6 +13,11 @@ __Warehouse View > Fanout Lambda > Kinesis Stream > Worker Lambda__
 - __Kinesis Stream__: contains a list of email addresses that need to be updated. The number of shards in this stream defines the concurrency level with which this system will hit Fullcontact's API.
 - __Worker Lambda__: automatically triggers when new records are added to the Kinesis stream. In batches of ten, queries the Fullcontact API and then persists the result to Stitch. This lambda runs eagerly, there is no rate limiting whatsoever.
 
+### Gotchas
+
+- You define the subnets where these lambdas run. These subnets __must__ be configured with NAT or some other way for the lambdas to access the internet without a public IP. If NAT is not set up, the lambdas will not be able to access Kinesis, Fullcontact or Stitch. If you aren't sure how to set this up, [AWS a lot of documentation about this](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Scenario2.html), and [many](https://gist.github.com/reggi/dc5f2620b7b4f515e68e46255ac042a7) [folks](http://evertrue.github.io/blog/2015/07/06/the-right-way-to-set-up-nat-in-ec2/) [on](http://www.tothenew.com/blog/configure-nat-instance-on-aws/) the internet have written about this topic.
+- Also be sure to choose subnets where they can access your warehouse. Again, the lambdas are not assigned a static public IP, so you can't just provide access through security groups.
+
 ### Usage
 
 #### Linux / macOS

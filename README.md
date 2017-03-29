@@ -48,7 +48,7 @@ Build the python lambda package:
 bin/build
 ```
 
-Deploy to terraform:
+Deploy with terraform:
 
 ```bash
 bin/plan

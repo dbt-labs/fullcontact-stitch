@@ -54,3 +54,7 @@ Deploy to terraform:
 bin/plan
 bin/apply
 ```
+
+---
+
+Copyright &copy; 2017 Fishtown Analytics

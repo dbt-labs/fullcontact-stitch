@@ -64,8 +64,6 @@ def handle_fanout(event, context, sql_generation_fn):
 
             enqueue_records(records)
 
-            break
-
         cursor.close()
 
         log("Done.")

@@ -23,7 +23,7 @@ def enqueue_records(records):
 
     log('Writing {} records to kinesis.'.format(len(records)))
 
-    kinesis_client.put_records(
+    response = kinesis_client.put_records(
         Records=[{
             'Data': json.dumps(record).encode('utf-8'),
             'PartitionKey': json.dumps(record)
@@ -31,6 +31,18 @@ def enqueue_records(records):
         StreamName=os.getenv('KINESIS_STREAM_NAME'))
 
     e = time.time()
+
+    if response.get('FailedRecordCount'):
+        for record in records:
+            if response.get('ErrorCode'):
+                if response.get('ErrorCode') == 'ProvisionedThroughputExceededException':  # noqa
+                    log('Throughput exceeded, trying again in 5 seconds.')
+                    time.sleep(5)
+                    return enqueue_records(records)
+
+                else:
+                    log('Error: {}'.format(response.get('ErrorMessage')))
+                    raise RuntimeError
 
     log('Wrote {} records to kinesis in {} seconds.'.format(
         len(records),
@@ -63,6 +75,8 @@ def handle_fanout(event, context, sql_generation_fn):
                 break
 
             enqueue_records(records)
+
+            time.sleep(0.5)
 
         cursor.close()
 

@@ -79,6 +79,27 @@ resource "aws_iam_role" "fullcontact_lambda" {
   assume_role_policy = "${data.aws_iam_policy_document.lambda_assume_role_policy.json}"
 }
 
+resource "aws_cloudwatch_event_rule" "daily" {
+  name        = "daily"
+  description = "Run daily at midnight"
+
+  schedule_expression = "cron(0 0 * * ? *)"
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_to_call_fullcontact_fanout" {
+    statement_id = "allow_cloudwatch_to_call_fullcontact_fanout"
+    action = "lambda:InvokeFunction"
+    function_name = "${aws_lambda_function.fullcontact_fanout.function_name}"
+    principal = "events.amazonaws.com"
+    source_arn = "${aws_cloudwatch_event_rule.daily.arn}"
+}
+
+resource "aws_cloudwatch_event_target" "daily_call_fullcontact_fanout" {
+    rule = "${aws_cloudwatch_event_rule.daily.name}"
+    target_id = "daily_call_fullcontact_fanout"
+    arn = "${aws_lambda_function.fullcontact_fanout.arn}"
+}
+
 resource "aws_lambda_function" "fullcontact_fanout" {
   filename = "../target/fullcontact_lambda.zip"
   source_code_hash = "${base64sha256(file("../target/fullcontact_lambda.zip"))}"
